@@ -1,6 +1,6 @@
 {
     "name": "Number to Japanese Converter",
-    "short_name": "Number to 日本語",
+    "short_name": "Num to 日本語",
     "description": "Convert numbers to Japanese (Romaji, Kana, Kanji)",
     "start_url": "/",
     "display": "standalone",
