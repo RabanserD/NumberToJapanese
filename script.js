@@ -37,9 +37,9 @@ function convertNumber(number, dict) {
         return "Error: Decimals are not supported";
     }
 
-    // Check if the number is greater than 999999999
-    if (parseInt(number) > 999999999) {
-        return "Error: Number is too large (greater than 999,999,999)";
+    // Check if the number is greater than 9999
+    if (parseInt(number) > 9999) {
+        return "Error: Number is too large (greater than 9999)";
     }
 
     // Validate for leading zeros or multiple zeros
@@ -72,6 +72,10 @@ function convertOneDigit(number, dict) {
 
 
 function convertTwoDigits(number, dict) {
+    number = number.replace(/^0+/, '') || "0";
+    if (number.length < 2) {
+        return convertOneDigit(number, dict);
+    }
     // Handle special case for 10
     if (number === "10") {
         return dict.get("10");
@@ -84,15 +88,17 @@ function convertTwoDigits(number, dict) {
 
     if (number.slice(1) === "0" && number.length === 2) {
         return dict.get(number[0]) + " " + dict.get("10");
-    } else if (number[0] === "0" && number.length === 2) {
-        return convertOneDigit(number.slice(1), dict);
     } else {
         return dict.get(number[0]) + " " + dict.get("10") + " " + dict.get(number[1]);
     }
 }
 
 
-function convertThreeDigits(number, dict, standalone = true) {
+function convertThreeDigits(number, dict) {
+    number = number.replace(/^0+/, '') || "0";
+    if (number.length < 3) {
+        return convertTwoDigits(number, dict);
+    }
     let numList = [];
     
     if (number[0] === "1") {
@@ -104,30 +110,25 @@ function convertThreeDigits(number, dict, standalone = true) {
     } else if (number[0] === "8") {
         numList.push(dict.get("800"));
     } else {
-        if(standalone == true){
-          numList.push(dict.get(number[0]));
-          numList.push(dict.get("100"));
-        }
-
+        numList.push(dict.get(number[0]));
+        numList.push(dict.get("100"));
     }
     
     if (number.slice(1) === "00") {
         // Do nothing if the number ends with "00" (like 100, 200, etc.)
     } else {
-        if (number[0] === "00") {
-            numList.push(convertTwoDigits(number.slice(1), dict));
-        } else if (number[1] === "0") {
-            numList.push(dict.get(number[2]));
-        } else {
-            numList.push(convertTwoDigits(number.slice(1), dict));
-        }
+        numList.push(convertTwoDigits(number.slice(1), dict));
     }
     
     let output = numList.join(" ").trim();
     return output;
 }
 
-function convertFourDigits(number, dict, standalone = true) {
+function convertFourDigits(number, dict) {
+    number = number.replace(/^0+/, '') || "0";
+    if (number.length < 3) {
+        return convertThreeDigits(number, dict);
+    }
     let numList = [];
 
     if (number[0] === "1") {
@@ -137,25 +138,15 @@ function convertFourDigits(number, dict, standalone = true) {
     } else if (number[0] === "8") {
         numList.push(dict.get("8000"));
     } else {
-        if(standalone == true){
-         numList.push(dict.get(number[0]));
-         numList.push(dict.get("1000"));
-        }
+        numList.push(dict.get(number[0]));
+        numList.push(dict.get("1000"));
     }
 
 
     if (number.slice(1) === "000" && number.length === 4) {
         // Do nothing if the number ends with "000" (like 1000, 2000, etc.)
     } else {
-        if (number[0] === "000") {
-            numList.push(convertThreeDigits(number.slice(1), dict));
-        } else if (number[1] === "00") {
-            numList.push(dict.get(number[2]));
-        } else if (number[2] === "00") {
-            numList.push(convertThreeDigits(number.slice(1), dict, true));
-        } else {
-            numList.push(convertThreeDigits(number.slice(1), dict, false));
-        }
+        numList.push(convertThreeDigits(number.slice(1), dict));
     }
     
     let output = numList.join(" ").trim();
@@ -166,7 +157,7 @@ function convertFourDigits(number, dict, standalone = true) {
 function convertLargeNumber(number, dict) {
     const length = number.length;
 
-    if (length > 8) {
+    if (length > 8) { //100.000.000+
         // Handle numbers with more than 8 digits, i.e., those requiring "oku" (億)
         const hundredsOfMillionsSegment = number.slice(0, -8);  // Digits up to 100 million
         const tenThousandsSegment = number.slice(-8, -4);  // Next 4 digits for "man" (万)
@@ -190,7 +181,7 @@ function convertLargeNumber(number, dict) {
         }
 
         return result.trim();
-    } else if (length > 4) {
+    } else if (length > 4) { //10.000+
         // Handle numbers with 5-8 digits, which only need "man" (万)
         const tenThousandsSegment = number.slice(0, -4);  // Digits for "man" (万)
         const thousandsSegment = number.slice(-4);  // Last 4 digits (thousands)
@@ -220,9 +211,9 @@ function convertSegment(number, dict) {
     } else if (number.length === 2) {
         return convertTwoDigits(number, dict);
     } else if (number.length === 3) {
-        return convertThreeDigits(number, dict);
+        return convertThreeDigits(number, dict, false);
     } else if (number.length === 4) {
-        return convertFourDigits(number, dict);
+        return convertFourDigits(number, dict, false);
     }
     return "";
 }
