@@ -10,7 +10,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    min-height: 50vh;
     background-color: #fafafa;  /* Light background */
     flex-direction: column;
     transition: background-color 0.3s, color 0.3s; /* Smooth transition */
@@ -96,9 +96,4 @@ footer a:hover {
     footer a:hover {
         color: #aaccee;  /* Slightly lighter on hover */
     }
-}
-
-/* Optional: if you want to keep the toggle button for manual switching */
-#theme-toggle {
-    margin-top: 20px;
 }

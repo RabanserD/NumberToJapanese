@@ -1,11 +1,11 @@
 {
     "name": "Number to Japanese Converter",
-    "short_name": "Number to Japanese",
+    "short_name": "Number to 日本語",
     "description": "Convert numbers to Japanese (Romaji, Kana, Kanji)",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",
-    "theme_color": "#4CAF50",
+    "theme_color": "#88aaff",
     "icons": [
         {
           "src": "windows11/SmallTile.scale-100.png",
