@@ -5,7 +5,6 @@ if ('serviceWorker' in navigator) {
       console.error('Service Worker registration failed:', error);
     });
   }
-  
 
 const romanjiMap = new Map([
     ["0", "zero"], ["1", "ichi"], ["2", "ni"], ["3", "san"], ["4", "yon"], ["5", "go"], ["6", "roku"], ["7", "nana"], ["8", "hachi"], ["9", "kyuu"], ["10", "juu"], 
@@ -52,7 +51,7 @@ function convertNumber(number, dict) {
     if (number.length <= 4) {
         switch (number.length) {
             case 1:
-                return dict.get(number); // For single digit
+                return convertOneDigit(number, dict); // For single digit
             case 2:
                 return convertTwoDigits(number, dict); // Handle 2 digits
             case 3:
@@ -60,11 +59,15 @@ function convertNumber(number, dict) {
             case 4:
                 return convertFourDigits(number, dict, true); // Handle 4 digits
             default:
-                return "Invalid length"; // This is a fallback, should not happen here
+                return "-"; // Handle no input
         }
     } else {
         return convertLargeNumber(number, dict); // For numbers longer than 4 digits
     }
+}
+
+function convertOneDigit(number, dict) {
+    return dict.get(number); // For single digit
 }
 
 
@@ -90,34 +93,36 @@ function convertTwoDigits(number, dict) {
 
 
 function convertThreeDigits(number, dict) {
-    // Handle special cases for 300, 600, and 800
-    if (number === "300") {
-        return dict.get("300");
-    } else if (number === "600") {
-        return dict.get("600");
-    } else if (number === "800") {
-        return dict.get("800");
-    }
-
-    // Special handling for "sanbyaku", "roppyaku", "happyaku" (300, 600, 800)
-    if (number[0] === "3") {
-        return dict.get("300") + " " + convertTwoDigits(number.slice(1), dict);
-    } else if (number[0] === "6") {
-        return dict.get("600") + " " + convertTwoDigits(number.slice(1), dict);
-    } else if (number[0] === "8") {
-        return dict.get("800") + " " + convertTwoDigits(number.slice(1), dict);
-    }
-
-    // General case for hundreds
-    const hundreds = number[0] === "1" ? dict.get("100") : dict.get(number[0]) + " " + dict.get("100");
+    let numList = [];
     
-    // For non-zero tens and units, convert them as two-digit numbers
-    if (number.slice(1) !== "00") {
-        return hundreds + " " + convertTwoDigits(number.slice(1), dict);
+    if (number[0] === "1") {
+        numList.push(dict.get("100"));
+    } else if (number[0] === "3") {
+        numList.push(dict.get("300"));
+    } else if (number[0] === "6") {
+        numList.push(dict.get("600"));
+    } else if (number[0] === "8") {
+        numList.push(dict.get("800"));
     } else {
-        return hundreds; // If tens and units are zero, return only hundreds part
+        numList.push(dict.get(number[0]));
+        numList.push(dict.get("100"));
     }
+    
+    if (number.slice(1) === "00" && number.length === 3) {
+        // Do nothing if the number ends with "00" (like 100, 200, etc.)
+    } else {
+        if (number[1] === "0") {
+            numList.push(dict.get(number[2]));
+        } else {
+            numList.push(convertTwoDigits(number.slice(1), dict));
+        }
+    }
+    
+    let output = numList.join(" ").trim();
+    return output;
 }
+
+
 
 
 function convertFourDigits(number, dict) {
