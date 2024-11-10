@@ -37,9 +37,9 @@ function convertNumber(number, dict) {
         return "Error: Decimals are not supported";
     }
 
-    // Check if the number is greater than 9999
-    if (parseInt(number) > 9999) {
-        return "Error: Number is too large (greater than 9999)";
+    // Check if the number is greater than 999999999
+    if (parseInt(number) > 999999999) {
+        return "Error: Number is too large (greater than 999999999)";
     }
 
     // Validate for leading zeros or multiple zeros
@@ -126,7 +126,7 @@ function convertThreeDigits(number, dict) {
 
 function convertFourDigits(number, dict) {
     number = number.replace(/^0+/, '') || "0";
-    if (number.length < 3) {
+    if (number.length < 4) {
         return convertThreeDigits(number, dict);
     }
     let numList = [];
@@ -167,17 +167,17 @@ function convertLargeNumber(number, dict) {
 
         // Convert hundreds of millions segment (億) if it's not zero
         if (parseInt(hundredsOfMillionsSegment) !== 0) {
-            result += convertSegment(hundredsOfMillionsSegment, dict) + " " + dict.get("100000000") + " ";
+            result += convertFourDigits(hundredsOfMillionsSegment, dict) + " " + dict.get("100000000") + " ";
         }
 
         // Convert ten-thousands segment (万) if it's not zero
         if (parseInt(tenThousandsSegment) !== 0) {
-            result += convertSegment(tenThousandsSegment, dict) + " " + dict.get("10000") + " ";
+            result += convertFourDigits(tenThousandsSegment, dict) + " " + dict.get("10000") + " ";
         }
 
         // Convert thousands segment if it's not zero
         if (parseInt(thousandsSegment) !== 0) {
-            result += convertSegment(thousandsSegment, dict);
+            result += convertFourDigits(thousandsSegment, dict);
         }
 
         return result.trim();
@@ -190,32 +190,16 @@ function convertLargeNumber(number, dict) {
 
         // Convert ten-thousands segment (万) if it's not zero
         if (parseInt(tenThousandsSegment) !== 0) {
-            result += convertSegment(tenThousandsSegment, dict) + " " + dict.get("10000") + " ";
+            result += convertFourDigits(tenThousandsSegment, dict) + " " + dict.get("10000") + " ";
         }
 
         // Convert thousands segment if it's not zero
         if (parseInt(thousandsSegment) !== 0) {
-            result += convertSegment(thousandsSegment, dict);
+            result += convertFourDigits(thousandsSegment, dict);
         }
 
         return result.trim();
     }
-
-    // For numbers less than 10,000, use the regular conversion function
-    return convertSegment(number, dict);
-}
-
-function convertSegment(number, dict) {
-    if (number.length === 1) {
-        return dict.get(number);
-    } else if (number.length === 2) {
-        return convertTwoDigits(number, dict);
-    } else if (number.length === 3) {
-        return convertThreeDigits(number, dict, false);
-    } else if (number.length === 4) {
-        return convertFourDigits(number, dict, false);
-    }
-    return "";
 }
 
 // Attach event listener to update outputs while typing
