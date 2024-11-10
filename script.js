@@ -82,17 +82,17 @@ function convertTwoDigits(number, dict) {
         return dict.get("10") + (number[1] !== "0" ? " " + dict.get(number[1]) : "");
     }
 
-    // Handle cases for multiples of 10, like 20, 30, etc.
-    if (number[1] === "0") {
+    if (number.slice(1) === "0" && number.length === 2) {
         return dict.get(number[0]) + " " + dict.get("10");
+    } else if (number[0] === "0" && number.length === 2) {
+        return convertOneDigit(number.slice(1), dict);
+    } else {
+        return dict.get(number[0]) + " " + dict.get("10") + " " + dict.get(number[1]);
     }
-
-    // General case for other two-digit numbers
-    return dict.get(number[0]) + " " + dict.get("10") + " " + dict.get(number[1]);
 }
 
 
-function convertThreeDigits(number, dict) {
+function convertThreeDigits(number, dict, standalone = true) {
     let numList = [];
     
     if (number[0] === "1") {
@@ -104,14 +104,19 @@ function convertThreeDigits(number, dict) {
     } else if (number[0] === "8") {
         numList.push(dict.get("800"));
     } else {
-        numList.push(dict.get(number[0]));
-        numList.push(dict.get("100"));
+        if(standalone == true){
+          numList.push(dict.get(number[0]));
+          numList.push(dict.get("100"));
+        }
+
     }
     
-    if (number.slice(1) === "00" && number.length === 3) {
+    if (number.slice(1) === "00") {
         // Do nothing if the number ends with "00" (like 100, 200, etc.)
     } else {
-        if (number[1] === "0") {
+        if (number[0] === "00") {
+            numList.push(convertTwoDigits(number.slice(1), dict));
+        } else if (number[1] === "0") {
             numList.push(dict.get(number[2]));
         } else {
             numList.push(convertTwoDigits(number.slice(1), dict));
@@ -123,35 +128,31 @@ function convertThreeDigits(number, dict) {
 }
 
 
-
-
 function convertFourDigits(number, dict) {
-    // Handle special case for 1000
-    if (number === "1000") {
-        return dict.get("1000");
-    } else if (number === "3000") {
-        return dict.get("3000");
-    } else if (number === "8000") {
-        return dict.get("8000");
-    }
+    let numList = [];
 
-    // Special handling for "sanzen", "hassen" (3000, 8000)
-    if (number[0] === "3") {
-        return dict.get("3000") + " " + convertThreeDigits(number.slice(1), dict);
+    if (number[0] === "1") {
+        numList.push(dict.get("1000"));
+    } else if (number[0] === "3") {
+        numList.push(dict.get("3000"));
     } else if (number[0] === "8") {
-        return dict.get("8000") + " " + convertThreeDigits(number.slice(1), dict);
-    }    
-
-    // General case for thousands
-    const thousands = number[0] === "1" ? dict.get("1000") : dict.get(number[0]) + " " + dict.get("1000");
-
-    // Only append hundreds, tens, and units if they are non-zero
-    if (number.slice(1) !== "000") {
-        return thousands + " " + convertThreeDigits(number.slice(1), dict);
+        numList.push(dict.get("8000"));
     } else {
-        return thousands;
+        numList.push(dict.get(number[0]));
+        numList.push(dict.get("1000"));
     }
+
+
+    if (number.slice(1) === "000" && number.length === 4) {
+        // Do nothing if the number ends with "00" (like 100, 200, etc.)
+    } else {
+        numList.push(convertThreeDigits(number.slice(1), dict, false));
+    }
+    
+    let output = numList.join(" ").trim();
+    return output;
 }
+
 
 function convertLargeNumber(number, dict) {
     const length = number.length;
