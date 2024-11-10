@@ -127,8 +127,7 @@ function convertThreeDigits(number, dict, standalone = true) {
     return output;
 }
 
-
-function convertFourDigits(number, dict) {
+function convertFourDigits(number, dict, standalone = true) {
     let numList = [];
 
     if (number[0] === "1") {
@@ -138,15 +137,25 @@ function convertFourDigits(number, dict) {
     } else if (number[0] === "8") {
         numList.push(dict.get("8000"));
     } else {
-        numList.push(dict.get(number[0]));
-        numList.push(dict.get("1000"));
+        if(standalone == true){
+         numList.push(dict.get(number[0]));
+         numList.push(dict.get("1000"));
+        }
     }
 
 
     if (number.slice(1) === "000" && number.length === 4) {
-        // Do nothing if the number ends with "00" (like 100, 200, etc.)
+        // Do nothing if the number ends with "000" (like 1000, 2000, etc.)
     } else {
-        numList.push(convertThreeDigits(number.slice(1), dict, false));
+        if (number[0] === "000") {
+            numList.push(convertThreeDigits(number.slice(1), dict));
+        } else if (number[1] === "00") {
+            numList.push(dict.get(number[2]));
+        } else if (number[2] === "00") {
+            numList.push(convertThreeDigits(number.slice(1), dict, true));
+        } else {
+            numList.push(convertThreeDigits(number.slice(1), dict, false));
+        }
     }
     
     let output = numList.join(" ").trim();
